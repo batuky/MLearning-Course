@@ -1,57 +1,41 @@
-import random as random
-import seaborn as sns
-import matplotlib.pyplot as plt
-%matplotlib inline
-sns.set(font_scale=1.5)
+import random
 
-winrate_stay = []
-winrate_change = []
-wins_stay = 0
-wins_change = 0
-random.seed(0)
-for i in range(10000):
-    #Initialize cars/goats setup
-    doors = ['Goat_1', 'Goat_2','Car']
-    random.shuffle(doors)
-    
-    #Player makes a guess
-    first_guess = random.choice(doors)
-    
-    #Monty opens a door
-    if first_guess == 'Goat_2':
-        monty_opens = 'Goat_1'
-    elif first_guess == 'Goat_1':
-        monty_opens = 'Goat_2'
-    else:
-        monty_opens = random.choice(['Goat_1', 'Goat_2'])                                   
-        #Adds one wins if Player stays with the first choice
-        wins_stay += 1
-    
-    #Switch doors
-    second_guess = doors
-    second_guess.remove(monty_opens)
-    second_guess.remove(first_guess)
-    
-    #Adds one win if player stays with the second choice                             
-    if second_guess == ['Car']:
-        wins_change += 1
-        
-    winrate_stay.append(wins_stay*100/(i+1))
-    winrate_change.append(wins_change*100/(i+1))
-    
-print('Win rate (don\'t change): {} %'.format(wins_stay/100))
-print('Win rate (changed doors): {} %'.format(wins_change/100))
+# Month Hall Problem Algorithm
+
+# for 1 time
+def run_trial(switch_doors, ndoors=3):
+    # Pick a random door out of the ndoors available
+    chosen_door = random.randint(1, ndoors)
+    # if switch_doors == True entre(switches doors)
+    if switch_doors:
+        # Reveal a goat
+        # revealed_door = 3 if chosen_door==2 else 2
+        if chosen_door ==2:
+            revealed_door =3
+        else:
+            revealed_door =2
+        # Make the switch by choosing any other door than the initially-
+        # selected one and the one just opened to reveal a goat. 
+        available_doors = [dnum for dnum in range(1,ndoors+1)
+                                if dnum not in (chosen_door, revealed_door)]
+        chosen_door = random.choice(available_doors)
+
+    # You win if you picked door number 1
+    return chosen_door == 1
 
 
+# for multiple times
+def run_trials(ntrials, switch_doors, ndoors=3):
+    nwins = 0
+    for i in range(ntrials):
+        if run_trial(switch_doors, ndoors):
+            nwins += 1
+    return nwins
 
+ndoors, ntrials = 3, 10000
+nwins_without_switch = run_trials(ntrials, False, ndoors)
+nwins_with_switch = run_trials(ntrials, True, ndoors)
 
-fig = plt.figure(figsize=(10,5))
-ax = plt.plot(winrate_stay, label='Stayed with first choice')
-ax = plt.plot(winrate_change, label='Changed doors')
-
-plt.xlim(0,200)
-plt.xlabel('Number of Simulations')
-plt.ylabel('Win rate (%)')
-plt.legend()
-plt.show()
-
+print('Monty Hall Problem with {} doors'.format(ndoors))
+print('Proportion of wins without switching: {:.4f}'.format(nwins_without_switch/ntrials))
+print('Proportion of wins with switching: {:.4f}'.format(nwins_with_switch/ntrials))
